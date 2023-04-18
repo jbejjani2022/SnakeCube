@@ -55,7 +55,6 @@ void setReports(void) {
   }
 }
 
-
 void loop() {
   delay(200);
 
