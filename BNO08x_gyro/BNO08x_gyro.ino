@@ -12,6 +12,12 @@
 
 Adafruit_BNO08x  bno08x(BNO08X_RESET);
 sh2_SensorValue_t sensorValue;
+int16_t gx, gy, gz;
+
+#define LED_PIN 13
+bool blinkState = false;
+int16_t prev_gy = 0;
+int16_t THRESHOLD = 5;
 
 void setup(void) {
   Serial.begin(115200);
@@ -42,6 +48,9 @@ void setup(void) {
   }
 
   setReports();
+  
+  // configure Arduino LED for
+    pinMode(LED_PIN, OUTPUT);
 
   Serial.println("Reading events");
   delay(100);
@@ -56,26 +65,32 @@ void setReports(void) {
 }
 
 void loop() {
-  delay(200);
+  delay(100);
 
   if (bno08x.wasReset()) {
-    Serial.print("sensor was reset ");
+    Serial.println("sensor was reset");
     setReports();
   }
-  
-  if (! bno08x.getSensorEvent(&sensorValue)) {
-    return;
+
+  if (!bno08x.getSensorEvent(&sensorValue)) {
+    Serial.println("failed to read sensor value");
   }
+
+  digitalWrite(LED_PIN, blinkState);
 
   switch (sensorValue.sensorId) {
     case SH2_GYROSCOPE_CALIBRATED:
-      Serial.print("Gyro - x: ");
-      Serial.print(sensorValue.un.gyroscope.x);
-      Serial.print(" y: ");
-      Serial.print(sensorValue.un.gyroscope.y);
-      Serial.print(" z: ");
-      Serial.print(sensorValue.un.gyroscope.z);
-      Serial.print("\n");
+      gx = sensorValue.un.gyroscope.x;
+      gy = sensorValue.un.gyroscope.y;
+      gz = sensorValue.un.gyroscope.z;
+      Serial.print("Gyro - x: "); Serial.print(gx);
+      Serial.print(" y: "); Serial.print(gy);        
+      Serial.print(" z: "); Serial.println(gz);  
+      if (gy > THRESHOLD && prev_gy < THRESHOLD) {
+        blinkState = !blinkState;
+        digitalWrite(LED_PIN, blinkState);
+      }
+      prev_gy = gy;
       break;
   }
 }
