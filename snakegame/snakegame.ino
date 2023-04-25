@@ -10,7 +10,7 @@ int16_t gx, gy, gz;
 int16_t prev_gx = 0;
 int16_t prev_gy = 0;
 int16_t prev_gz = 0;
-// Threshold gyroscope value required to register a turn in the snake
+// Threshold sensor value required to register a turn in the snake
 const int16_t THRESHOLD = 5;
 
 // Max snake length
@@ -27,8 +27,8 @@ struct pixel
 struct snake_type
 {
   // int length; // length of snake
-  LinkedList<pixel> body = LinkedList<pixel>();
   // int body[MAX_LENGTH][2]; // array of [face_id, pixel_id] pairs
+  LinkedList<pixel> body = LinkedList<pixel>();
   char direction; // 'u' = UP, 'd' = DOWN, 'l' = LEFT, 'r' = RIGHT
 };
 
@@ -47,9 +47,10 @@ void setup(void) {
   Serial.println("BNO08x found");
 
   setReports();
-  // pixel p = {.face = 0, .id = 1};
-  // snake.body.add(p);
-  // Serial.println(snake.body.size());
+
+  initialize_snake();
+  Serial.println(snake.body.size());
+
   delay(100);
 }
 
@@ -63,9 +64,23 @@ void setReports(void) {
 
 void loop () {
   delay(100);
-  get_gyro ();
-  move_snake ();
-  check_collision ();
+  get_gyro();
+  move_snake();
+  check_collision();
+}
+
+void initialize_snake (void) {
+  // if analog input pin 0 is unconnected, random analog
+  // noise will cause the call to randomSeed() to generate
+  // different seed numbers each time the sketch runs.
+  // randomSeed() will then shuffle the random function.
+  randomSeed(analogRead(0));
+  // Spawn the new length 1 snake at a random pixel
+  pixel p = {random(6), random(36)};
+  snake.body.add(p);
+  // TODO: Turn on pixel p
+  // Initialize snake direction as up
+  snake.direction = 'u';
 }
 
 void get_gyro (void) {
