@@ -1,10 +1,34 @@
+// Include the BNO08x IMU library for gyro data
 #include <Adafruit_BNO08x.h>
 // See https://github.com/ivanseidel/LinkedList
 #include <LinkedList.h>
+// Include the NeoPixel library
+#include <Adafruit_NeoPixel.h>
 
-#define BNO08X_RESET -1
+// Define number of LEDs per face
+#define LED_COUNT 36
+// Define the Arduino pin for each face
+#define FACE0_LED_PIN 0
+#define FACE1_LED_PIN 1
+#define FACE2_LED_PIN 2
+#define FACE3_LED_PIN 3
+#define FACE4_LED_PIN 4
+#define FACE5_LED_PIN 5
+
+// Declare each NeoPixel face object and an array of all the faces
+Adafruit_NeoPixel face0(LED_COUNT, FACE0_LED_PIN, NEO_GRB + NEO_KHZ800);
+Adafruit_NeoPixel face1(LED_COUNT, FACE1_LED_PIN, NEO_GRB + NEO_KHZ800);
+Adafruit_NeoPixel face2(LED_COUNT, FACE2_LED_PIN, NEO_GRB + NEO_KHZ800);
+Adafruit_NeoPixel face3(LED_COUNT, FACE3_LED_PIN, NEO_GRB + NEO_KHZ800);
+Adafruit_NeoPixel face4(LED_COUNT, FACE4_LED_PIN, NEO_GRB + NEO_KHZ800);
+Adafruit_NeoPixel face5(LED_COUNT, FACE5_LED_PIN, NEO_GRB + NEO_KHZ800);
+
+Adafruit_NeoPixel faces[6] = {face0, face1, face2, face3, face4, face5};
+
+const int numFaces = sizeof(faces) / sizeof(faces[0]);
 
 // Declare variables for gyroscope data
+#define BNO08X_RESET -1
 Adafruit_BNO08x  bno08x(BNO08X_RESET);
 sh2_SensorValue_t sensorValue;
 int16_t gx, gy, gz;
@@ -36,6 +60,9 @@ struct snake_type
 // Declare snake object
 snake_type snake;
 
+const uint32_t snakeColor = face0.Color(0, 255, 0);
+const uint32_t appleColor = face0.Color(255, 0, 0);
+
 void setup(void) {
   Serial.begin(115200);
   // Pause execution until serial console opens
@@ -46,8 +73,14 @@ void setup(void) {
     while (1) { delay(10); }
   }
   Serial.println("BNO08x found");
-
   setReports();
+
+  // Set up the NeoPixel faces
+  for (int i = 0; i < numFaces; i++){
+    faces[i].begin();
+    faces[i].show();
+    faces[i].setBrightness(20);
+  }
 
   initialize_snake();
   spawn_apple();
@@ -65,7 +98,7 @@ void setReports(void) {
 
 void loop () {
   delay(100);
-  get_gyro();
+  get_direction();
   move_snake();
 }
 
@@ -75,11 +108,13 @@ void initialize_snake (void) {
   // different seed numbers each time the sketch runs.
   // randomSeed() will then shuffle the random function.
   randomSeed(analogRead(0));
-  // Spawn the new length 1 snake at a random pixel
+  // Generate random pixel and add it to the snake body
   pixel p = {random(6), random(36)};
   snake.body.add(p);
-  // TODO: Turn on pixel p
-
+  // Turn on pixel p
+  faces[p.face].clear();
+  faces[p.face].setPixelColor(p.id, snakeColor);
+  faces[p.face].show();
   // Initialize snake direction as up
   snake.direction = 'u';
 }
@@ -87,9 +122,10 @@ void initialize_snake (void) {
 // Spawn the apple at a random pixel that is not in the snake body
 void spawn_apple (void) {
   int snake_size = snake.body.size();
-  bool in_snake = false;
+  pixel apple;
+  bool in_snake;
   do {
-    pixel apple = {random(6), random(36)};
+    apple = {random(6), random(36)};
     in_snake = false;
     for (int h = 0; h < snake_size; h++) {
       pixel body = snake.body.get(h);
@@ -102,9 +138,13 @@ void spawn_apple (void) {
   }
   while (in_snake);
   // Turn on the apple pixel
+  faces[apple.face].clear();
+  faces[apple.face].setPixelColor(apple.id, appleColor);
+  faces[apple.face].show();
 }
 
-void get_gyro (void) {
+// Determine snake direction based on gyro data
+void get_direction (void) {
   if (bno08x.wasReset()) {
     Serial.println("Sensor was reset");
     setReports();
@@ -133,9 +173,9 @@ void get_gyro (void) {
 }
 
 void move_snake(void) {
-  // Turn off the tail pixel of the snake
   // Update the new head pixel of the snake according to
   // the snake's current direction, and turn on the new head
+
   check_collision();
   check_apple();
 }
@@ -146,8 +186,9 @@ void check_collision(void) {
 }
 
 void check_apple(void) {
-  // Check if head of the snake is equal to apple pixel
-  // If so, extend snake by one pixel
-  // Then, if size of snake is max length, end the game with a win
-  // If not, spawn a new apple
+  // If head of the snake is equal to apple pixel
+    // If size of snake is max length, end the game with a win
+    // Else spawn a new apple
+
+  // Else turn off the tail pixel of the snake
   }
