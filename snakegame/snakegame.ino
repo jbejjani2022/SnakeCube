@@ -1,4 +1,5 @@
 #include <Adafruit_BNO08x.h>
+// See https://github.com/ivanseidel/LinkedList
 #include <LinkedList.h>
 
 #define BNO08X_RESET -1
@@ -13,7 +14,7 @@ int16_t prev_gz = 0;
 // Threshold sensor value required to register a turn in the snake
 const int16_t THRESHOLD = 5;
 
-// Max snake length
+// Winning snake length
 const int MAX_LENGTH = 20;
 
 // Define pixel datatype
@@ -26,10 +27,10 @@ struct pixel
 // Define snake datatype
 struct snake_type
 {
-  // int length; // length of snake
-  // int body[MAX_LENGTH][2]; // array of [face_id, pixel_id] pairs
+  // a linked list of pixels representing the body of the snake
   LinkedList<pixel> body = LinkedList<pixel>();
-  char direction; // 'u' = UP, 'd' = DOWN, 'l' = LEFT, 'r' = RIGHT
+  // the snake's current direction
+  char direction;   // 'u' = UP, 'd' = DOWN, 'l' = LEFT, 'r' = RIGHT
 };
 
 // Declare snake object
@@ -49,7 +50,7 @@ void setup(void) {
   setReports();
 
   initialize_snake();
-  Serial.println(snake.body.size());
+  spawn_apple();
 
   delay(100);
 }
@@ -66,7 +67,6 @@ void loop () {
   delay(100);
   get_gyro();
   move_snake();
-  check_collision();
 }
 
 void initialize_snake (void) {
@@ -79,8 +79,29 @@ void initialize_snake (void) {
   pixel p = {random(6), random(36)};
   snake.body.add(p);
   // TODO: Turn on pixel p
+
   // Initialize snake direction as up
   snake.direction = 'u';
+}
+
+// Spawn the apple at a random pixel that is not in the snake body
+void spawn_apple (void) {
+  int snake_size = snake.body.size();
+  bool in_snake = false;
+  do {
+    pixel apple = {random(6), random(36)};
+    in_snake = false;
+    for (int h = 0; h < snake_size; h++) {
+      pixel body = snake.body.get(h);
+      if (apple.face == body.face && apple.id == body.id) {
+        in_snake = true;
+        Serial.println("apple in snake");
+        break;
+      }
+    }    
+  }
+  while (in_snake);
+  // Turn on the apple pixel
 }
 
 void get_gyro (void) {
@@ -98,6 +119,9 @@ void get_gyro (void) {
       gx = sensorValue.un.gyroscope.x;
       gy = sensorValue.un.gyroscope.y;
       gz = sensorValue.un.gyroscope.z;
+      Serial.print("Gyro - x: "); Serial.print(gx);
+      Serial.print(" y: "); Serial.print(gy);        
+      Serial.print(" z: "); Serial.println(gz); 
       if (gy > THRESHOLD && prev_gy < THRESHOLD) {
         Serial.println("Above threshold");
       }
@@ -112,8 +136,18 @@ void move_snake(void) {
   // Turn off the tail pixel of the snake
   // Update the new head pixel of the snake according to
   // the snake's current direction, and turn on the new head
+  check_collision();
+  check_apple();
 }
 
 void check_collision(void) {
   // Check if the head of the snake is equal to one of its body pixels
+  // If so, end the game with a loss
 }
+
+void check_apple(void) {
+  // Check if head of the snake is equal to apple pixel
+  // If so, extend snake by one pixel
+  // Then, if size of snake is max length, end the game with a win
+  // If not, spawn a new apple
+  }
