@@ -59,7 +59,10 @@ struct snake_type
 
 // Declare snake object
 snake_type snake;
+// Declare apple variable
+pixel apple;
 
+// Define color constants for snake and apple pixels
 const uint32_t snakeColor = face0.Color(0, 255, 0);
 const uint32_t appleColor = face0.Color(255, 0, 0);
 
@@ -122,7 +125,6 @@ void initialize_snake (void) {
 // Spawn the apple at a random pixel that is not in the snake body
 void spawn_apple (void) {
   int snake_size = snake.body.size();
-  pixel apple;
   bool in_snake;
   do {
     apple = {random(6), random(36)};
