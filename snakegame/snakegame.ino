@@ -103,6 +103,10 @@ void loop () {
   delay(100);
   get_direction();
   move_snake();
+  pixel head = snake.body.get(0);
+  check_collision(head);
+  check_apple(head);
+  check_win();
 }
 
 void initialize_snake (void) {
@@ -129,8 +133,8 @@ void spawn_apple (void) {
   do {
     apple = {random(6), random(36)};
     in_snake = false;
-    for (int h = 0; h < snake_size; h++) {
-      pixel body = snake.body.get(h);
+    for (int i = 0; i < snake_size; i++) {
+      pixel body = snake.body.get(i);
       if (apple.face == body.face && apple.id == body.id) {
         in_snake = true;
         Serial.println("apple in snake");
@@ -140,7 +144,6 @@ void spawn_apple (void) {
   }
   while (in_snake);
   // Turn on the apple pixel
-  faces[apple.face].clear();
   faces[apple.face].setPixelColor(apple.id, appleColor);
   faces[apple.face].show();
 }
@@ -177,20 +180,42 @@ void get_direction (void) {
 void move_snake(void) {
   // Update the new head pixel of the snake according to
   // the snake's current direction, and turn on the new head
-
-  check_collision();
-  check_apple();
 }
 
-void check_collision(void) {
+void check_collision(head) {
   // Check if the head of the snake is equal to one of its body pixels
   // If so, end the game with a loss
+  int snake_size = snake.body.size();
+  for (int i = 1; i < snake_size; i++) {
+      pixel body = snake.body.get(i);
+      if (head.face == body.face && head.id == body.id) {
+        // Do something to end game with a loss
+
+        Serial.println("Game over.");
+        break;
+      }
+  }
 }
 
-void check_apple(void) {
-  // If head of the snake is equal to apple pixel
-    // If size of snake is max length, end the game with a win
-    // Else spawn a new apple
-
+void check_apple(head) {
+  // If head of the snake is equal to apple pixel, turn off the apple and spawn a new apple
   // Else turn off the tail pixel of the snake
+  if (head.face == apple.face && head.id == apple.id) {
+    faces[apple.face].setPixelColor(apple.id, 0);
+    spawn_apple();
   }
+  else {
+    pixel tail = snake.body.pop();
+    faces[tail.face].setPixelColor(tail.id, 0);
+    faces[tail.face].show();
+  }
+}
+
+void check_win(void) {
+  // If size of snake is max length, end the game with a win
+  if (snake.body.size() = MAX_LENGTH) {
+    // Do something to end game with a win
+    
+    Serial.println("You win.");
+  }
+}

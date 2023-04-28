@@ -4,7 +4,7 @@
 #include <Adafruit_NeoPixel.h> // Include the NeoPixel library
 
 #define LED_PIN 6 // define the Arduino pin that the first NeoPixel's DIN is connected to
-#define LED_COUNT 12 // define the number of pixels
+#define LED_COUNT 36 // define the number of pixels
 
 // Initialize the Neopixel object as "stick"
 Adafruit_NeoPixel stick(LED_COUNT, LED_PIN, NEO_GRB + NEO_KHZ800);
