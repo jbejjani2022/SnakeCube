@@ -8,22 +8,12 @@
 // Define number of LEDs per face
 #define LED_COUNT 36
 // Define the Arduino pin for each face
-#define FACE0_LED_PIN 0
-#define FACE1_LED_PIN 1
-#define FACE2_LED_PIN 2
-#define FACE3_LED_PIN 3
-#define FACE4_LED_PIN 4
-#define FACE5_LED_PIN 5
+#define FACE0_LED_PIN 6
 
 // Declare each NeoPixel face object and an array of all the faces
 Adafruit_NeoPixel face0(LED_COUNT, FACE0_LED_PIN, NEO_GRB + NEO_KHZ800);
-Adafruit_NeoPixel face1(LED_COUNT, FACE1_LED_PIN, NEO_GRB + NEO_KHZ800);
-Adafruit_NeoPixel face2(LED_COUNT, FACE2_LED_PIN, NEO_GRB + NEO_KHZ800);
-Adafruit_NeoPixel face3(LED_COUNT, FACE3_LED_PIN, NEO_GRB + NEO_KHZ800);
-Adafruit_NeoPixel face4(LED_COUNT, FACE4_LED_PIN, NEO_GRB + NEO_KHZ800);
-Adafruit_NeoPixel face5(LED_COUNT, FACE5_LED_PIN, NEO_GRB + NEO_KHZ800);
 
-Adafruit_NeoPixel faces[6] = {face0, face1, face2, face3, face4, face5};
+Adafruit_NeoPixel faces[1] = {face0};
 
 const int numFaces = sizeof(faces) / sizeof(faces[0]);
 
@@ -36,10 +26,10 @@ int16_t prev_gx = 0;
 int16_t prev_gy = 0;
 int16_t prev_gz = 0;
 // Threshold sensor value required to register a turn in the snake
-const int16_t THRESHOLD = 5;
+const int16_t THRESHOLD = 3;
 
 // Winning snake length
-const int MAX_LENGTH = 20;
+const int MAX_LENGTH = 5;
 
 // Define pixel datatype
 struct pixel
@@ -81,7 +71,7 @@ void setup(void) {
   // Set up the NeoPixel faces
   for (int i = 0; i < numFaces; i++){
     faces[i].begin();
-    faces[i].show();
+    faces[i].clear();
     faces[i].setBrightness(20);
   }
 
@@ -100,7 +90,7 @@ void setReports(void) {
 }
 
 void loop () {
-  delay(100);
+  delay(500);
   get_direction();
   move_snake();
   pixel head = snake.body.get(0);
@@ -116,7 +106,7 @@ void initialize_snake (void) {
   // randomSeed() will then shuffle the random function.
   randomSeed(analogRead(0));
   // Generate random pixel and add it to the snake body
-  pixel p = {random(6), random(36)};
+  pixel p = {0, random(36)};
   snake.body.add(p);
   // Turn on pixel p
   faces[p.face].clear();
@@ -131,7 +121,7 @@ void spawn_apple (void) {
   int snake_size = snake.body.size();
   bool in_snake;
   do {
-    apple = {random(6), random(36)};
+    apple = {0, random(36)};
     in_snake = false;
     for (int i = 0; i < snake_size; i++) {
       pixel body = snake.body.get(i);
@@ -166,10 +156,29 @@ void get_direction (void) {
       gz = sensorValue.un.gyroscope.z;
       Serial.print("Gyro - x: "); Serial.print(gx);
       Serial.print(" y: "); Serial.print(gy);        
-      Serial.print(" z: "); Serial.println(gz); 
-      if (gy > THRESHOLD && prev_gy < THRESHOLD) {
-        Serial.println("Above threshold");
+      Serial.print(" z: "); Serial.println(gz);
+      // We only want the maximum gyro input to determine the new direction
+      int16_t max_g = max(abs(gx), max(abs(gy), abs(gz)));
+      if (max_g <= THRESHOLD) {
+        break;
       }
+      else if (abs(gx) == max_g && abs(prev_gx) < THRESHOLD) {
+        if (gx > 0) {
+          snake.direction = 'u';
+        }
+        else {
+          snake.direction = 'd';
+        }
+      }    
+      else if (abs(gy) == max_g && abs(prev_gy) < THRESHOLD) {
+        if (gx > 0) {
+          snake.direction = 'r';
+        }
+        else {
+          snake.direction = 'l';
+        }
+      }
+
       prev_gx = gx;
       prev_gy = gy;
       prev_gz = gz;
@@ -180,6 +189,49 @@ void get_direction (void) {
 void move_snake(void) {
   // Update the new head pixel of the snake according to
   // the snake's current direction, and turn on the new head
+  char dir = snake.direction;
+  pixel head = snake.body.get(0);
+  pixel new_head;
+  int new_head_id;
+  if (dir == 'u') {
+    new_head_id = head.id - 6;
+    if (new_head_id < 0) {
+      new_head = {head.face, new_head_id + 36};      
+    }
+    else {
+      new_head = {head.face, new_head_id};
+    }
+  }
+  else if (dir == 'd') {
+    new_head_id = head.id + 6;
+    if (new_head_id > 36) {
+      new_head = {head.face, new_head_id - 36};
+    }
+    else {
+      new_head = {head.face, new_head_id};
+    }
+  }
+  else if (dir == 'r') {
+    new_head_id = head.id + 1;
+    if (new_head_id % 6 == 0) {
+      new_head = {head.face, new_head_id - 6};
+    }
+    else {
+      new_head = {head.face, new_head_id};
+    }
+  }  
+  else {
+    new_head_id = head.id - 1;
+    if (head.id % 6 == 0) {
+      new_head = {head.face, new_head_id + 6};
+    }
+    else {
+      new_head = {head.face, new_head_id};
+    }
+  }  
+  snake.body.unshift(new_head);
+  faces[new_head.face].setPixelColor(new_head.id, snakeColor);
+  faces[new_head.face].show();
 }
 
 void check_collision(pixel head) {
@@ -190,9 +242,10 @@ void check_collision(pixel head) {
       pixel body = snake.body.get(i);
       if (head.face == body.face && head.id == body.id) {
         // Do something to end game with a loss
-
         Serial.println("Game over.");
-        break;
+        while (true) {
+          delay(100);
+        }
       }
   }
 }
@@ -215,7 +268,9 @@ void check_win(void) {
   // If size of snake is max length, end the game with a win
   if (snake.body.size() == MAX_LENGTH) {
     // Do something to end game with a win
-    
     Serial.println("You win.");
+    while (true) {
+          delay(100);
+        }
   }
 }
