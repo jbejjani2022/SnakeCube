@@ -300,6 +300,141 @@ void get_direction (void) {
 void move_snake(void) {
   // Update the new head pixel of the snake according to
   // the snake's current direction, and turn on the new head
+  // Check if snake is crossing from one face to another and
+  // update head id accordingly
+  char dir = snake.direction;
+  pixel head = snake.body.get(0);
+  pixel new_head;
+  switch (dir) {
+    case 'u':
+      if (head.id - 6 < 0) {
+        // Snake is crossing top edge of the face
+        switch(head.face) {
+          case 0:
+          case 1:
+          case 2:
+          case 3:
+            // Snake is crossing from face 0 to face 1,
+            // face 1 to 2, face 2 to 3, or face 3 to 0
+            new_head = {(head.face + 1) % 3, head.id + 30};
+            break;
+          case 4:
+            // from face 4 to 3
+            new_head = {3, head.id + 7 * (5 - head.id % 6)};
+            break;
+          case 5:
+            // from face 5 to 3
+            new_head = {3, head.id + 5 * (head.id % 6)};
+            break;
+        }
+      }
+      else {
+        new_head = {head.face, head.id - 6};
+      }
+      break;
+    case 'd':
+      if (head.id + 6 > 35) {
+        // Snake is crossing bottom edge of the face
+        switch (head.face) {
+          case 0:
+            // Snake is crossing from face 0 to face 3
+            new_head = {3, head.id - 30};
+            break;
+          case 1:
+          case 2:
+          case 3:
+            // Snake is crossing from face 1 to face 0,
+            // face 2 to 1, or face 1 to 0
+            new_head = {head.face - 1, head.id - 30};
+            break;
+          case 4:
+            // from face 4 to 1
+            new_head = {1, head.id - 5 * (5 - head.id % 6)};
+            break;
+          case 5:
+            // from face 5 to 1
+            new_head = {1, head.id - 7 * (head.id - 30)};
+            break;
+        } 
+      }
+      else {
+        new_head = {head.face, head.id + 6};
+      }
+      break;
+    case 'r':
+      if ((head.id + 1) % 6 == 0) {
+        // Snake is crossing right edge of the face
+        switch(head.face) {
+          case 0:
+            // Snake is crossing from face 0 to face 4
+            new_head = {4, 6 * (6 - head.id / 6) - 1};
+            break;
+          case 1:
+            // from face 1 to 4
+            new_head = {4, head.id + 5 * (5 - head.id / 6)};
+            break;
+          case 2:
+            // from face 2 to 4
+            new_head = {4, head.id - 5};
+            break;
+          case 3:
+            // from face 3 to 4
+            new_head = {4, head.id - 7 * (head.id / 6)};
+            break;
+          case 4:
+            // from face 4 to 0
+            new_head = {0, 6 * (6 - head.id / 6) - 1};
+            break;
+          case 5:
+            // from face 5 to 2
+            new_head = {2, head.id - 5};
+            break;
+        }
+      }
+      else {
+        new_head = {head.face, head.id + 1};
+      }
+      break;
+    case 'l':
+      if (head.id % 6 == 0) {
+        // Snake is crossing left edge of the face
+        switch(head.face) {
+          case 0:
+            // Snake is crossing from face 0 to 5
+            new_head = {5, abs(head.id - 30)};
+            break;
+          case 1:
+            // from face 1 to 5
+            new_head = {5, head.id + 7 * (5 - head.id / 6)};
+            break;
+          case 2:
+            // from face 2 to 5
+            new_head = {5, head.id + 5};
+            break;
+          case 3:
+            // from face 3 to 5
+            new_head = {5, head.id - 5 * (head.id / 6)};
+            break;
+          case 4:
+            // from face 4 to 2
+            new_head = {2, head.id + 5};
+            break;
+          case 5:
+            // from face 5 to 0
+            new_head = {0, abs(head.id - 30)};
+            break;
+        }
+      }
+      else {
+        new_head = {head.face, head.id - 1};
+      }
+      break;
+  }
+  // Insert the new head pixel at the front of the body linked list
+  snake.body.unshift(new_head);
+  // Turn on the new head pixel
+  faces[new_head.face].setPixelColor(new_head.id, snakeColor);
+  faces[new_head.face].show();
 }
 
 void check_collision(pixel head) {

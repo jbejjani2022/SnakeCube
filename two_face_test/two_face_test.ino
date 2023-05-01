@@ -209,7 +209,7 @@ void move_snake(void) {
   }
   else if (dir == 'd') {
     new_head_id = head.id + 6;
-    if (new_head_id > 36) {
+    if (new_head_id > 35) {
       new_head = {1 - head.face, new_head_id - 36};
     }
     else {
