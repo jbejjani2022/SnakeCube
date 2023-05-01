@@ -172,13 +172,124 @@ void get_direction (void) {
 
       // We only want the maximum gyro input to determine the new direction
       int16_t max_g = max(abs(gx), max(abs(gy), abs(gz)));
+      // Ignore gyro values that are not greater than the threshold
       if (max_g <= THRESHOLD) {
         break;
       }      
-
-      if (gy > THRESHOLD && prev_gy < THRESHOLD) {
-        Serial.println("Above threshold");
+      // Get the face where the snake's head is currently
+      int face = snake.body.get(0).face;
+      // Update the snake's direction based on face and gyro data
+      switch (face) {
+        case 0:
+          if (abs(gx) == max_g && abs(prev_gx) <= THRESHOLD) {
+            if (gx > 0) {
+              snake.direction = 'd';
+            }
+            else {
+              snake.direction = 'u';
+            }
+          }
+          else if (abs(gz) == max_g && abs(prev_gz) <= THRESHOLD) {
+            if (gz > 0) {
+              snake.direction = 'r';
+            }
+            else {
+              snake.direction = 'l';
+            }            
+          }
+          break;
+        case 1:
+          if (abs(gx) == max_g && abs(prev_gx) <= THRESHOLD) {
+            if (gx > 0) {
+              snake.direction = 'd';
+            }
+            else {
+              snake.direction = 'u';
+            }
+          }
+          else if (abs(gy) == max_g && abs(prev_gy) <= THRESHOLD) {
+            if (gy > 0) {
+              snake.direction = 'r';
+            }
+            else {
+              snake.direction = 'l';
+            }
+          }
+          break;
+        case 2:
+          if (abs(gx) == max_g && abs(prev_gx) <= THRESHOLD) {
+            if (gx > 0) {
+              snake.direction = 'd';
+            }
+            else {
+              snake.direction = 'u';
+            }
+          }
+          else if (abs(gz) == max_g && abs(prev_gz) <= THRESHOLD) {
+            if (gz > 0) {
+              snake.direction = 'l';
+            }
+            else {
+              snake.direction = 'r';
+            }
+          }
+          break;
+        case 3:
+          if (abs(gx) == max_g && abs(prev_gx) <= THRESHOLD) {
+            if (gx > 0) {
+              snake.direction = 'd';
+            }
+            else {
+              snake.direction = 'u';
+            }
+          }
+          else if (abs(gy) == max_g && abs(prev_gy) <= THRESHOLD) {
+            if (gy > 0) {
+              snake.direction = 'l';
+            }
+            else {
+              snake.direction = 'r';
+            }
+          }
+          break;
+        case 4:
+          if (abs(gy) == max_g && abs(prev_gy) <= THRESHOLD) {
+            if (gy > 0) {
+              snake.direction = 'd';
+            }
+            else {
+              snake.direction = 'u';
+            }
+          }
+          else if (abs(gx) == max_g && abs(prev_gx) <= THRESHOLD) {
+            if (gx > 0) {
+              snake.direction = 'l';
+            }
+            else {
+              snake.direction = 'r';
+            }
+          }
+          break;
+        case 5:
+          if (abs(gy) == max_g && abs(prev_gy) <= THRESHOLD) {
+            if (gy > 0) {
+              snake.direction = 'u';
+            }
+            else {
+              snake.direction = 'd';
+            }
+          }
+          else if (abs(gx) == max_g && abs(prev_gx) <= THRESHOLD) {
+            if (gx > 0) {
+              snake.direction = 'r';
+            }
+            else {
+              snake.direction = 'l';
+            }
+          }
+          break;
       }
+      
       prev_gx = gx;
       prev_gy = gy;
       prev_gz = gz;
