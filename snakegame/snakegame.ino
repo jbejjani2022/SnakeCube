@@ -15,6 +15,8 @@
 #define FACE4_LED_PIN 4
 #define FACE5_LED_PIN 5
 
+#define RESET_BUTTON_PIN 7
+
 // Declare each NeoPixel face object and an array of all the faces
 Adafruit_NeoPixel face0(LED_COUNT, FACE0_LED_PIN, NEO_GRB + NEO_KHZ800);
 Adafruit_NeoPixel face1(LED_COUNT, FACE1_LED_PIN, NEO_GRB + NEO_KHZ800);
@@ -27,6 +29,9 @@ Adafruit_NeoPixel faces[6] = {face0, face1, face2, face3, face4, face5};
 
 const int numFaces = sizeof(faces) / sizeof(faces[0]);
 
+long snakeUpdateTime;
+unsigned long previousTime;
+
 // Declare variables for gyroscope data
 #define BNO08X_RESET -1
 Adafruit_BNO08x  bno08x(BNO08X_RESET);
@@ -36,7 +41,7 @@ int16_t prev_gx = 0;
 int16_t prev_gy = 0;
 int16_t prev_gz = 0;
 // Threshold sensor value required to register a turn in the snake
-const int16_t THRESHOLD = 5;
+const int16_t THRESHOLD = 3;
 
 // Winning snake length
 const int MAX_LENGTH = 20;
@@ -78,17 +83,9 @@ void setup(void) {
   Serial.println("BNO08x found");
   setReports();
 
-  // Set up the NeoPixel faces
-  for (int i = 0; i < numFaces; i++){
-    faces[i].begin();
-    faces[i].show();
-    faces[i].setBrightness(20);
-  }
+  pinMode(RESET_BUTTON_PIN, INPUT);
 
-  initialize_snake();
-  spawn_apple();
-
-  delay(100);
+  reset_game();
 }
 
 // Define the sensor outputs that need to be received
@@ -100,13 +97,18 @@ void setReports(void) {
 }
 
 void loop () {
-  delay(100);
+  delay(10);
+  check_reset();
   get_direction();
-  move_snake();
-  pixel head = snake.body.get(0);
-  check_collision(head);
-  check_apple(head);
-  check_win();
+  unsigned long currentTime = millis();
+  if(currentTime - previousTime > snakeUpdateTime) {
+    move_snake();
+    pixel head = snake.body.get(0);
+    check_collision(head);
+    check_apple(head);
+    check_win();
+    previousTime = currentTime;
+  }
 }
 
 void initialize_snake (void) {
@@ -116,7 +118,7 @@ void initialize_snake (void) {
   // randomSeed() will then shuffle the random function.
   randomSeed(analogRead(0));
   // Generate random pixel and add it to the snake body
-  pixel p = {random(6), random(36)};
+  pixel p = {random(numFaces), random(LED_COUNT))};
   snake.body.add(p);
   // Turn on pixel p
   faces[p.face].clear();
@@ -131,7 +133,7 @@ void spawn_apple (void) {
   int snake_size = snake.body.size();
   bool in_snake;
   do {
-    apple = {random(6), random(36)};
+    apple = {random(numFaces), random(LED_COUNT)};
     in_snake = false;
     for (int i = 0; i < snake_size; i++) {
       pixel body = snake.body.get(i);
@@ -167,6 +169,13 @@ void get_direction (void) {
       Serial.print("Gyro - x: "); Serial.print(gx);
       Serial.print(" y: "); Serial.print(gy);        
       Serial.print(" z: "); Serial.println(gz); 
+
+      // We only want the maximum gyro input to determine the new direction
+      int16_t max_g = max(abs(gx), max(abs(gy), abs(gz)));
+      if (max_g <= THRESHOLD) {
+        break;
+      }      
+
       if (gy > THRESHOLD && prev_gy < THRESHOLD) {
         Serial.println("Above threshold");
       }
@@ -189,10 +198,10 @@ void check_collision(pixel head) {
   for (int i = 1; i < snake_size; i++) {
       pixel body = snake.body.get(i);
       if (head.face == body.face && head.id == body.id) {
-        // Do something to end game with a loss
-
         Serial.println("Game over.");
-        break;
+        while (!check_reset()) {
+          delay(100);
+        }
       }
   }
 }
@@ -214,8 +223,40 @@ void check_apple(pixel head) {
 void check_win(void) {
   // If size of snake is max length, end the game with a win
   if (snake.body.size() == MAX_LENGTH) {
-    // Do something to end game with a win
-    
     Serial.println("You win.");
+    while (!check_reset()) {
+          delay(100);
+        }
   }
+}
+
+bool check_reset(){
+  if (digitalRead(RESET_BUTTON_PIN) == LOW){
+    reset_game();
+    return true;
+  }
+  return false;
+}
+
+void reset_game() {
+  // Clear the snake
+  snake.body.clear();
+  // Read the value at the potentiometer pin
+  int potValue = analogRead(A0);
+  // Set the snake's speed according to the potentiometer's state
+  // The potentiometer thus functions as a "speed dial"
+  snakeUpdateTime = 100 + round(0.9 * potValue);
+
+  // Set up the NeoPixel faces
+  for (int i = 0; i < numFaces; i++){
+    faces[i].begin();
+    faces[i].clear();
+    faces[i].setBrightness(20);
+  }
+
+  initialize_snake();
+  spawn_apple();
+
+  delay(100);
+  previousTime = millis();
 }

@@ -246,7 +246,6 @@ void check_collision(pixel head) {
   for (int i = 1; i < snake_size; i++) {
       pixel body = snake.body.get(i);
       if (head.face == body.face && head.id == body.id) {
-        // Do something to end game with a loss
         Serial.println("Game over.");
         while (!check_reset()) {
           delay(100);
