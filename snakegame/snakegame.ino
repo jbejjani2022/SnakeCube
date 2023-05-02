@@ -321,10 +321,12 @@ void move_snake(void) {
           case 4:
             // from face 4 to 3
             new_head = {3, head.id + 7 * (5 - head.id % 6)};
+            snake.direction = 'l';
             break;
           case 5:
             // from face 5 to 3
             new_head = {3, head.id + 5 * (head.id % 6)};
+            snake.direction = 'r';
             break;
         }
       }
@@ -350,10 +352,12 @@ void move_snake(void) {
           case 4:
             // from face 4 to 1
             new_head = {1, head.id - 5 * (5 - head.id % 6)};
+            snake.direction = 'l';
             break;
           case 5:
             // from face 5 to 1
             new_head = {1, head.id - 7 * (head.id - 30)};
+            snake.direction = 'r';
             break;
         } 
       }
@@ -368,10 +372,12 @@ void move_snake(void) {
           case 0:
             // Snake is crossing from face 0 to face 4
             new_head = {4, 6 * (6 - head.id / 6) - 1};
+            snake.direction = 'l';
             break;
           case 1:
             // from face 1 to 4
             new_head = {4, head.id + 5 * (5 - head.id / 6)};
+            snake.direction = 'u';
             break;
           case 2:
             // from face 2 to 4
@@ -380,10 +386,12 @@ void move_snake(void) {
           case 3:
             // from face 3 to 4
             new_head = {4, head.id - 7 * (head.id / 6)};
+            snake.direction = 'd';
             break;
           case 4:
             // from face 4 to 0
             new_head = {0, 6 * (6 - head.id / 6) - 1};
+            snake.direction = 'l';
             break;
           case 5:
             // from face 5 to 2
@@ -402,10 +410,12 @@ void move_snake(void) {
           case 0:
             // Snake is crossing from face 0 to 5
             new_head = {5, abs(head.id - 30)};
+            snake.direction = 'r';
             break;
           case 1:
             // from face 1 to 5
             new_head = {5, head.id + 7 * (5 - head.id / 6)};
+            snake.direction = 'u';
             break;
           case 2:
             // from face 2 to 5
@@ -414,6 +424,7 @@ void move_snake(void) {
           case 3:
             // from face 3 to 5
             new_head = {5, head.id - 5 * (head.id / 6)};
+            snake.direction = 'd';
             break;
           case 4:
             // from face 4 to 2
@@ -422,6 +433,7 @@ void move_snake(void) {
           case 5:
             // from face 5 to 0
             new_head = {0, abs(head.id - 30)};
+            snake.direction = 'r';
             break;
         }
       }
@@ -487,6 +499,9 @@ bool check_reset(){
 void reset_game() {
   // Clear the snake
   snake.body.clear();
+  // Clear apple
+  faces[apple.face].setPixelColor(apple.id, 0);
+  faces[apple.face].show();
   // Read the value at the potentiometer pin
   int potValue = analogRead(A0);
   // Set the snake's speed according to the potentiometer's state
