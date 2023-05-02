@@ -15,7 +15,8 @@
 #define FACE4_LED_PIN 4
 #define FACE5_LED_PIN 5
 
-#define RESET_BUTTON_PIN 7
+const int buzzer = 6; // piezo buzzer to arduino pin 6
+#define RESET_BUTTON_PIN 7 // reset button to arduino pin 7
 
 // Declare each NeoPixel face object and an array of all the faces
 Adafruit_NeoPixel face0(LED_COUNT, FACE0_LED_PIN, NEO_GRB + NEO_KHZ800);
@@ -83,7 +84,8 @@ void setup(void) {
   Serial.println("BNO08x found");
   setReports();
 
-  pinMode(RESET_BUTTON_PIN, INPUT);
+  pinMode(RESET_BUTTON_PIN, INPUT); // Set reset button as an input
+  pinMode(buzzer, OUTPUT); // Set buzzer - pin 6 as an output
 
   // Start game when reset button is pressed
   while (!check_reset()) {
@@ -460,6 +462,14 @@ void check_collision(pixel head) {
       pixel body = snake.body.get(i);
       if (head.face == body.face && head.id == body.id) {
         Serial.println("Game over.");
+        // Play game over tune on piezo buzzer
+        tone(buzzer, 791); // G5
+        delay(500);
+        tone(buzzer, 747); // F#5
+        delay(600);
+        tone(buzzer, 705); // F5
+        delay(1000);
+        noTone(buzzer);
         while (!check_reset()) {
           delay(100);
         }
@@ -473,6 +483,14 @@ void check_apple(pixel head) {
   if (head.face == apple.face && head.id == apple.id) {
     faces[apple.face].setPixelColor(apple.id, 0);
     spawn_apple();
+    // Play apple eaten tune on buzzer
+    tone(buzzer, 528); // C5
+    delay(120);
+    tone(buzzer, 665); // E5
+    delay(120);
+    tone(buzzer, 791); // G5
+    delay(200);
+    noTone(buzzer);
   }
   else {
     pixel tail = snake.body.pop();
@@ -485,6 +503,21 @@ void check_win(void) {
   // If size of snake is max length, end the game with a win
   if (snake.body.size() == MAX_LENGTH) {
     Serial.println("You win.");
+    // Play game won tune on piezo buzzer
+    tone(buzzer, 1056); // C6
+    delay(400);
+    noTone(buzzer); 
+    delay(50);
+    tone(buzzer, 1056); // C6
+    delay(400);
+    noTone(buzzer); 
+    delay(60);
+    tone(buzzer, 1056); // C6
+    delay(100);
+    tone(buzzer, 1582); // G6
+    delay(500);
+    noTone(buzzer);
+    delay(1000);    
     while (!check_reset()) {
           delay(100);
         }
