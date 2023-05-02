@@ -15,8 +15,8 @@
 #define FACE4_LED_PIN 4
 #define FACE5_LED_PIN 5
 
-const int buzzer = 6; // piezo buzzer to arduino pin 6
-#define RESET_BUTTON_PIN 7 // reset button to arduino pin 7
+#define RESET_BUTTON_PIN 6 // reset button to arduino pin 7
+const int buzzer = 7; // piezo buzzer to arduino pin 6
 
 // Declare each NeoPixel face object and an array of all the faces
 Adafruit_NeoPixel face0(LED_COUNT, FACE0_LED_PIN, NEO_GRB + NEO_KHZ800);
