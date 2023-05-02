@@ -85,7 +85,10 @@ void setup(void) {
 
   pinMode(RESET_BUTTON_PIN, INPUT);
 
-  reset_game();
+  // Start game when reset button is pressed
+  while (!check_reset()) {
+          delay(100);
+        }
 }
 
 // Define the sensor outputs that need to be received
@@ -346,7 +349,7 @@ void move_snake(void) {
           case 2:
           case 3:
             // Snake is crossing from face 1 to face 0,
-            // face 2 to 1, or face 1 to 0
+            // face 2 to 1, or face 3 to 2
             new_head = {head.face - 1, head.id - 30};
             break;
           case 4:
