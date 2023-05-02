@@ -118,7 +118,7 @@ void initialize_snake (void) {
   // randomSeed() will then shuffle the random function.
   randomSeed(analogRead(0));
   // Generate random pixel and add it to the snake body
-  pixel p = {random(numFaces), random(LED_COUNT))};
+  pixel p = {random(numFaces), random(LED_COUNT)};
   snake.body.add(p);
   // Turn on pixel p
   faces[p.face].clear();

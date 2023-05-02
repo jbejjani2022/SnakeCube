@@ -8,7 +8,7 @@
 // Define number of LEDs per face
 #define LED_COUNT 36
 // Define the Arduino pin for each face
-#define FACE0_LED_PIN 6
+#define FACE0_LED_PIN 2
 
 #define RESET_BUTTON_PIN 7
 
