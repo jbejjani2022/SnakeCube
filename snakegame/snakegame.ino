@@ -316,7 +316,7 @@ void move_snake(void) {
           case 3:
             // Snake is crossing from face 0 to face 1,
             // face 1 to 2, face 2 to 3, or face 3 to 0
-            new_head = {(head.face + 1) % 3, head.id + 30};
+            new_head = {(head.face + 1) % 4, head.id + 30};
             break;
           case 4:
             // from face 4 to 3
