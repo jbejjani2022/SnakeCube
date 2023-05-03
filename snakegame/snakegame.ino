@@ -41,7 +41,7 @@ int16_t prev_gx = 0;
 int16_t prev_gy = 0;
 int16_t prev_gz = 0;
 // Threshold sensor value required to register a turn in the snake
-const int16_t THRESHOLD = 3;
+const int16_t THRESHOLD = 2;
 
 // Winning snake length
 const int MAX_LENGTH = 20;
