@@ -8,11 +8,11 @@
 // Define number of LEDs per face
 #define LED_COUNT 36
 // Define the Arduino pin for each face
-#define FACE0_LED_PIN 0
-#define FACE1_LED_PIN 1
-#define FACE2_LED_PIN 2
-#define FACE3_LED_PIN 3
-#define FACE4_LED_PIN 4
+#define FACE0_LED_PIN 2
+#define FACE1_LED_PIN 3
+#define FACE2_LED_PIN 1
+#define FACE3_LED_PIN 4
+#define FACE4_LED_PIN 0
 #define FACE5_LED_PIN 5
 
 #define RESET_BUTTON_PIN 6 // reset button to arduino pin 7
@@ -42,10 +42,10 @@ int16_t prev_gx = 0;
 int16_t prev_gy = 0;
 int16_t prev_gz = 0;
 // Threshold sensor value required to register a turn in the snake
-const int16_t THRESHOLD = 2;
+const int16_t THRESHOLD = 1;
 
 // Winning snake length
-const int MAX_LENGTH = 20;
+const int MAX_LENGTH = 6;
 
 // Define pixel datatype
 struct pixel
@@ -85,7 +85,10 @@ void setup(void) {
   setReports();
 
   pinMode(RESET_BUTTON_PIN, INPUT); // Set reset button as an input
+  digitalWrite(RESET_BUTTON_PIN, HIGH);
   pinMode(buzzer, OUTPUT); // Set buzzer - pin 6 as an output
+
+  reset_game();
 
   // Start game when reset button is pressed
   while (!check_reset()) {
@@ -121,7 +124,7 @@ void initialize_snake (void) {
   // noise will cause the call to randomSeed() to generate
   // different seed numbers each time the sketch runs.
   // randomSeed() will then shuffle the random function.
-  randomSeed(analogRead(0));
+  randomSeed(analogRead(A1));
   // Generate random pixel and add it to the snake body
   pixel p = {random(numFaces), random(LED_COUNT)};
   snake.body.add(p);
@@ -183,113 +186,165 @@ void get_direction (void) {
       }      
       // Get the face where the snake's head is currently
       int face = snake.body.get(0).face;
+
+      char prev_direction = snake.direction;
       // Update the snake's direction based on face and gyro data
+      // Make it impossible for the snake to turn into itself
+      // by revesing direction, except when snake is length 1
       switch (face) {
         case 0:
           if (abs(gx) == max_g && abs(prev_gx) <= THRESHOLD) {
             if (gx > 0) {
-              snake.direction = 'd';
+              if (prev_direction != 'u' || snake.body.size() == 1){
+                snake.direction = 'd';
+              }
             }
             else {
-              snake.direction = 'u';
+              if (prev_direction != 'd' || snake.body.size() == 1){
+                snake.direction = 'u';
+              }
             }
           }
           else if (abs(gz) == max_g && abs(prev_gz) <= THRESHOLD) {
             if (gz > 0) {
-              snake.direction = 'r';
+              if (prev_direction != 'l' || snake.body.size() == 1){
+                snake.direction = 'r';
+              }
             }
             else {
-              snake.direction = 'l';
+              if (prev_direction != 'r' || snake.body.size() == 1){
+                snake.direction = 'l';
+              }
             }            
           }
           break;
         case 1:
           if (abs(gx) == max_g && abs(prev_gx) <= THRESHOLD) {
             if (gx > 0) {
-              snake.direction = 'd';
+              if (prev_direction != 'u' || snake.body.size() == 1){
+                snake.direction = 'd';
+              }
             }
             else {
-              snake.direction = 'u';
+              if (prev_direction != 'd' || snake.body.size() == 1){
+                snake.direction = 'u';
+              }
             }
           }
           else if (abs(gy) == max_g && abs(prev_gy) <= THRESHOLD) {
             if (gy > 0) {
-              snake.direction = 'r';
+              if (prev_direction != 'l' || snake.body.size() == 1){
+                snake.direction = 'r';
+              }
             }
             else {
-              snake.direction = 'l';
+              if (prev_direction != 'r' || snake.body.size() == 1){
+                snake.direction = 'l';
+              }
             }
           }
           break;
         case 2:
           if (abs(gx) == max_g && abs(prev_gx) <= THRESHOLD) {
             if (gx > 0) {
-              snake.direction = 'd';
+              if (prev_direction != 'u' || snake.body.size() == 1){
+                snake.direction = 'd';
+              }
             }
             else {
-              snake.direction = 'u';
+              if (prev_direction != 'd' || snake.body.size() == 1){
+                snake.direction = 'u';
+              }
             }
           }
           else if (abs(gz) == max_g && abs(prev_gz) <= THRESHOLD) {
             if (gz > 0) {
-              snake.direction = 'l';
+              if (prev_direction != 'r' || snake.body.size() == 1){
+                snake.direction = 'l';
+              }
             }
             else {
-              snake.direction = 'r';
+              if (prev_direction != 'l' || snake.body.size() == 1){
+                snake.direction = 'r';
+              }
             }
           }
           break;
         case 3:
           if (abs(gx) == max_g && abs(prev_gx) <= THRESHOLD) {
             if (gx > 0) {
-              snake.direction = 'd';
+              if (prev_direction != 'u' || snake.body.size() == 1){
+                snake.direction = 'd';
+              }
             }
             else {
-              snake.direction = 'u';
+              if (prev_direction != 'd' || snake.body.size() == 1){
+                snake.direction = 'u';
+              }
             }
           }
           else if (abs(gy) == max_g && abs(prev_gy) <= THRESHOLD) {
             if (gy > 0) {
-              snake.direction = 'l';
+              if (prev_direction != 'r' || snake.body.size() == 1){
+                snake.direction = 'l';
+              }
             }
             else {
-              snake.direction = 'r';
+              if (prev_direction != 'l' || snake.body.size() == 1){
+                snake.direction = 'r';
+              }
             }
           }
           break;
         case 4:
           if (abs(gy) == max_g && abs(prev_gy) <= THRESHOLD) {
             if (gy > 0) {
-              snake.direction = 'd';
+              if (prev_direction != 'u' || snake.body.size() == 1){
+                snake.direction = 'd';
+              }
             }
             else {
-              snake.direction = 'u';
+              if (prev_direction != 'd' || snake.body.size() == 1){
+                snake.direction = 'u';
+              }
             }
           }
           else if (abs(gx) == max_g && abs(prev_gx) <= THRESHOLD) {
             if (gx > 0) {
-              snake.direction = 'l';
+              if (prev_direction != 'r' || snake.body.size() == 1){
+                snake.direction = 'l';
+              }
             }
             else {
-              snake.direction = 'r';
+              if (prev_direction != 'l' || snake.body.size() == 1){
+                snake.direction = 'r';
+              }
             }
           }
           break;
         case 5:
           if (abs(gy) == max_g && abs(prev_gy) <= THRESHOLD) {
             if (gy > 0) {
-              snake.direction = 'u';
+              if (prev_direction != 'd' || snake.body.size() == 1){
+                snake.direction = 'u';
+              }
             }
             else {
-              snake.direction = 'd';
+              if (prev_direction != 'u' || snake.body.size() == 1){
+                snake.direction = 'd';
+              }
             }
           }
           else if (abs(gx) == max_g && abs(prev_gx) <= THRESHOLD) {
             if (gx > 0) {
-              snake.direction = 'r';
+              if (prev_direction != 'l' || snake.body.size() == 1){
+                snake.direction = 'r';
+              }
             }
             else {
-              snake.direction = 'l';
+              if (prev_direction != 'r' || snake.body.size() == 1){
+                snake.direction = 'l';
+              }  
             }
           }
           break;
@@ -517,7 +572,13 @@ void check_win(void) {
     tone(buzzer, 1582); // G6
     delay(500);
     noTone(buzzer);
-    delay(1000);    
+    delay(1000); 
+    for (int i = 0; i < numFaces; i++){
+    faces[i].begin();
+    faces[i].clear();
+    faces[i].setBrightness(20);
+    faces[i].show();
+  }   
     while (!check_reset()) {
           delay(100);
         }
@@ -526,6 +587,7 @@ void check_win(void) {
 
 bool check_reset(){
   if (digitalRead(RESET_BUTTON_PIN) == LOW){
+    Serial.print("reset button clicked");
     reset_game();
     return true;
   }
@@ -549,6 +611,7 @@ void reset_game() {
     faces[i].begin();
     faces[i].clear();
     faces[i].setBrightness(20);
+    faces[i].show();
   }
 
   initialize_snake();

@@ -3,7 +3,7 @@
 
 #include <Adafruit_NeoPixel.h> // Include the NeoPixel library
 
-#define LED_PIN 2 // define the Arduino pin that the first NeoPixel's DIN is connected to
+#define LED_PIN 0 // define the Arduino pin that the first NeoPixel's DIN is connected to
 #define LED_COUNT 36 // define the number of pixels
 
 // Initialize the Neopixel object as "stick"
@@ -15,6 +15,7 @@ int ledId = 0;
 
 void setup() {
   stick.begin();
+  stick.clear();
   stick.show();
   stick.setBrightness(20);
 }
@@ -31,5 +32,5 @@ void showSelected(int id, uint32_t color){
   stick.clear();
   stick.setPixelColor(id, color);
   stick.show();
-  delay(500);
+  delay(100);
 }
