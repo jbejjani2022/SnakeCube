@@ -3,6 +3,6 @@
 
 Encased in lasercut transparent acrylic, the cube's electronic components include NeoPixel LED strips, an Arduino MKRZERO, a BNO08x gyroscope, a few SN74AHCT125N logic level shifters, and a few staple components such as a piezo buzzer, potentiometer, protoboard, breadboard, slide switch, battery pack, and many wires and buttons.
 
-A lot of design work went into coordinating the movement of the snake across different faces, as well as creating a self-contained, closed game environment robust to quick rotations on all axes. Team: Joey Bejjani, Aiman Anuar, Dillon Browning, Grayson Martin.
+A lot of design work went into engineering a closed game environment robust to quick rotations on all axes as well as coordinating the movement of the snake across different faces. Team: Joey Bejjani, Aiman Anuar, Dillon Browning, Grayson Martin.
 
 See the SnakeCube in action in our [video presentation](https://www.youtube.com/watch?v=e_J05hN6BZY).
